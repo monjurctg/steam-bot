@@ -43,7 +43,7 @@ try {
   client.on("webSession", (sessionid, cookies) => {
     manager.setCookies(cookies);
     community.setCookies(cookies);
-    community.startConfirmationChecker(10000, config.idSecret);
+    community.startConfirmationChecker(10000, "n0abtleLCJh5CmO5N48xxtr4gIA=");
     sendRandomItem();
   });
 } catch (err) {
