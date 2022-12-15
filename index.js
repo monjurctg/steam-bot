@@ -69,15 +69,20 @@ try {
 //   }
 // });
 
-function sendRandomItem() {}
-
 // load inventory end point send all inventory
 
-app.get("/deposit/:partner/itemId", (req, res) => {
-  const partner = req.params.partner;
+app.get("/deposit", (req, res) => {
+  const partner = req.query.partner;
+  const itemId = req.query.itemId;
   const appid = 730;
   const contextid = 2;
   console.log(partner);
+
+  if (!partner) {
+    res.status(500).json({succes: false, message: "steam Id is required"});
+  } else if (!itemId) {
+    res.status(500).json({succes: false, message: "itemId is required"});
+  }
 
   //  "https://steamcommunity.com/tradeoffer/new/?partner=1216619463&token=dXPBgZ6U"
   const offer = manager.createOffer(`${partner}`);
@@ -95,6 +100,7 @@ app.get("/deposit/:partner/itemId", (req, res) => {
         res.status(500).json({succes: false, message: err.message});
       } else {
         const theirItem = theirInv.find((item) => item.id == itemId);
+        res.json({data: theirItem});
         // theirInv[Math.floor(Math.random() * theirInv.length - 1)];
         // offer.addTheirItem(theirItem);
         // offer.setMessage(`Will you trade your ${theirItem.name}`);
@@ -108,6 +114,89 @@ app.get("/deposit/:partner/itemId", (req, res) => {
       }
     }
   );
+
+  // manager.loadInventory(appid, contextid, true, (err, myInv) => {
+  //   // console.log("load inventory");
+  //   // console.log(myInv);
+  //   if (err) {
+  //     console.log(err);
+  //   } else {
+  //     const myItem = myInv.find((item) => item.classid == itemId);
+  //     // const myItem = myInv[Math.floor(Math.random() * myInv.length - 1)];
+  //     // console.log(myItem, "item");
+  //     offer.addMyItem(myItem);
+  //     manager.loadUserInventory(
+  //       partner,
+  //       appid,
+  //       contextid,
+  //       false,
+  //       (err, theirInv) => {
+  //         console.log(theirInv, "injskdjksdjskdjksjdksjdkv");
+
+  //         if (err) {
+  //           console.log(err);
+  //         } else {
+  //           const theirItem =
+  //             theirInv[Math.floor(Math.random() * theirInv.length - 1)];
+  //           offer.addTheirItem(theirItem);
+  //           offer.setMessage(
+  //             `Will you trade your ${theirItem.name} for my ${myItem.name}?`
+  //           );
+  //           offer.send((err, status) => {
+  //             if (err) {
+  //               console.log(err.message);
+  //             } else {
+  //               console.log(`Sent offer. Status: ${status}.`);
+  //             }
+  //           });
+  //         }
+  //       }
+  //     );
+  //   }
+  // });
+});
+
+app.get("/withdraw", (req, res) => {
+  const partner = req.query.partner;
+  const itemId = req.query.itemId;
+  const appid = 730;
+  const contextid = 2;
+  console.log(partner);
+
+  if (!partner) {
+    res.status(500).json({succes: false, message: "steam Id is required"});
+  } else if (!itemId) {
+    res.status(500).json({succes: false, message: "itemId is required"});
+  }
+
+  //  "https://steamcommunity.com/tradeoffer/new/?partner=1216619463&token=dXPBgZ6U"
+  const offer = manager.createOffer(`${partner}`);
+  // for deposit
+  manager.loadInventory(appid, contextid, true, (err, myInv) => {
+    // console.log(theirInv, "injskdjksdjskdjksjdksjdkv");
+
+    if (err) {
+      console.log(err);
+      res.status(500).json({succes: false, message: err.message});
+    } else {
+      const myItem = myInv.find((item) => item.id == itemId);
+      console.log(myItem, "myItem");
+
+      offer.addMyItem(myItem);
+      // theirInv[Math.floor(Math.random() * theirInv.length - 1)];
+      // offer.addTheirItem(theirItem);
+      offer.setMessage(`Will you withdraw your ${myItem.name}`);
+      offer.send((err, status) => {
+        if (err) {
+          console.log(err);
+          res.status(500).json({success: false, message: err.message});
+        } else {
+          console.log(`Sent offer. Status: ${status}.`);
+          res.status(500).json({success: true, status: status});
+        }
+      });
+    }
+  });
 
   // manager.loadInventory(appid, contextid, true, (err, myInv) => {
   //   // console.log("load inventory");
