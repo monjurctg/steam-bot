@@ -6,7 +6,6 @@ const SteamTotp = require("steam-totp");
 const TradeOfferManager = require("steam-tradeoffer-manager");
 
 const SteamCommunity = require("steamcommunity");
-const apiRoute = require("./routes/apiRoute");
 
 const config = require("./config.json");
 const app = express();
@@ -37,14 +36,12 @@ try {
 
   client.on("loggedOn", () => {
     console.log("Logged into Steam");
-
     client.setPersona(SteamUser.EPersonaState.Online, " monjurul alam ");
     client.gamesPlayed(730);
   });
 
   client.on("webSession", (sessionid, cookies) => {
     manager.setCookies(cookies);
-
     community.setCookies(cookies);
     community.startConfirmationChecker(10000, config.idSecret);
     sendRandomItem();
@@ -76,21 +73,14 @@ function sendRandomItem() {}
 
 // load inventory end point send all inventory
 
-app.get("/deposit/:partner/", (req, res) => {
+app.get("/deposit/:partner/itemId", (req, res) => {
   const partner = req.params.partner;
-  // const itemId = req.params.itemId;
-
-  // 76561199176885191
-
   const appid = 730;
   const contextid = 2;
   console.log(partner);
 
   //  "https://steamcommunity.com/tradeoffer/new/?partner=1216619463&token=dXPBgZ6U"
   const offer = manager.createOffer(`${partner}`);
-  // console.log(offer, "ofer");
-  // offer.addTheirItem();
-
   // for deposit
   manager.loadUserInventory(
     partner,
@@ -102,10 +92,9 @@ app.get("/deposit/:partner/", (req, res) => {
 
       if (err) {
         console.log(err);
+        res.status(500).json({succes: false, message: err.message});
       } else {
-        // const theirItem = theirInv.find((item) => item.id == itemId);
-        console.log(theirInv, "thirItem");
-
+        const theirItem = theirInv.find((item) => item.id == itemId);
         // theirInv[Math.floor(Math.random() * theirInv.length - 1)];
         // offer.addTheirItem(theirItem);
         // offer.setMessage(`Will you trade your ${theirItem.name}`);
@@ -198,7 +187,6 @@ app.get("/", (req, res) => {
   res.status(200).json({message: "app run successfully"});
 });
 
-app.use("/api", apiRoute);
 app.listen(port, () => {
   console.log("App running in port", port);
 });
