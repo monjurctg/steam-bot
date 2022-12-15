@@ -32,23 +32,26 @@ const logOnOptions = {
   twoFactorCode: SteamTotp.generateAuthCode(config.sharedSecret),
 };
 
-client.logOn(logOnOptions);
+try {
+  client.logOn(logOnOptions);
 
-client.on("loggedOn", () => {
-  console.log("Logged into Steam");
+  client.on("loggedOn", () => {
+    console.log("Logged into Steam");
 
-  client.setPersona(SteamUser.EPersonaState.Online, " monjurul alam ");
-  client.gamesPlayed(730);
-});
+    client.setPersona(SteamUser.EPersonaState.Online, " monjurul alam ");
+    client.gamesPlayed(730);
+  });
 
-client.on("webSession", (sessionid, cookies) => {
-  manager.setCookies(cookies);
+  client.on("webSession", (sessionid, cookies) => {
+    manager.setCookies(cookies);
 
-  community.setCookies(cookies);
-  community.startConfirmationChecker(10000, config.idSecret);
-  sendRandomItem();
-});
-
+    community.setCookies(cookies);
+    community.startConfirmationChecker(10000, config.idSecret);
+    sendRandomItem();
+  });
+} catch (err) {
+  console.log(err);
+}
 // manager.on("newOffer", (offer) => {
 //   if (offer.partner.getSteamID64() === "132224795&token=HuEE9Mk1") {
 //     offer.accept((err, status) => {
