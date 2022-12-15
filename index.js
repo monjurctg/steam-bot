@@ -49,10 +49,6 @@ client.on("webSession", (sessionid, cookies) => {
   sendRandomItem();
 });
 
-app.get("/", (req, res) => {
-  res.status(200).json({message: "app run successfully"});
-});
-
 // manager.on("newOffer", (offer) => {
 //   if (offer.partner.getSteamID64() === "132224795&token=HuEE9Mk1") {
 //     offer.accept((err, status) => {
@@ -194,6 +190,9 @@ app.get("/my-inventory", (req, res) => {
       res.status(200).json({success: true, data: myInventory});
     }
   });
+});
+app.get("/", (req, res) => {
+  res.status(200).json({message: "app run successfully"});
 });
 
 app.use("/api", apiRoute);
