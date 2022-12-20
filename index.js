@@ -26,9 +26,9 @@ const manager = new TradeOfferManager({
 });
 
 const logOnOptions = {
-  accountName: "barracuda_ezzhe",
-  password: "qwerasdfzxcv1234QWER",
-  twoFactorCode: SteamTotp.generateAuthCode("Y0ouP85dRuf2Hl0vwLDBQjj33OQ="),
+  accountName: config.username,
+  password: config.password,
+  twoFactorCode: SteamTotp.generateAuthCode(config.sharedSecret),
 };
 
 try {
@@ -43,7 +43,7 @@ try {
   client.on("webSession", (sessionid, cookies) => {
     manager.setCookies(cookies);
     community.setCookies(cookies);
-    community.startConfirmationChecker(10000, "n0abtleLCJh5CmO5N48xxtr4gIA=");
+    community.startConfirmationChecker(10000, config.idSecret);
     sendRandomItem();
   });
 } catch (err) {
@@ -86,74 +86,30 @@ app.get("/deposit", (req, res) => {
 
   //  "https://steamcommunity.com/tradeoffer/new/?partner=1216619463&token=dXPBgZ6U"
   const offer = manager.createOffer(`${partner}`);
-  // for deposit
+
   manager.loadUserInventory(
     partner,
     appid,
     contextid,
     false,
     (err, theirInv) => {
-      // console.log(theirInv, "injskdjksdjskdjksjdksjdkv");
-
       if (err) {
         console.log(err);
         res.status(500).json({succes: false, message: err.message});
       } else {
         const theirItem = theirInv.find((item) => item.id == itemId);
-        res.json({data: theirItem});
-        // theirInv[Math.floor(Math.random() * theirInv.length - 1)];
-        // offer.addTheirItem(theirItem);
-        // offer.setMessage(`Will you trade your ${theirItem.name}`);
-        // offer.send((err, status) => {
-        //   if (err) {
-        //     console.log(err.message);
-        //   } else {
-        //     console.log(`Sent offer. Status: ${status}.`);
-        //   }
-        // });
+        offer.addTheirItem(theirItem);
+        offer.setMessage(`Will you deposit your ${theirItem.name}`);
+        offer.send((err, status) => {
+          if (err) {
+            console.log(err.message);
+          } else {
+            console.log(`Sent offer. Status: ${status}.`);
+          }
+        });
       }
     }
   );
-
-  // manager.loadInventory(appid, contextid, true, (err, myInv) => {
-  //   // console.log("load inventory");
-  //   // console.log(myInv);
-  //   if (err) {
-  //     console.log(err);
-  //   } else {
-  //     const myItem = myInv.find((item) => item.classid == itemId);
-  //     // const myItem = myInv[Math.floor(Math.random() * myInv.length - 1)];
-  //     // console.log(myItem, "item");
-  //     offer.addMyItem(myItem);
-  //     manager.loadUserInventory(
-  //       partner,
-  //       appid,
-  //       contextid,
-  //       false,
-  //       (err, theirInv) => {
-  //         console.log(theirInv, "injskdjksdjskdjksjdksjdkv");
-
-  //         if (err) {
-  //           console.log(err);
-  //         } else {
-  //           const theirItem =
-  //             theirInv[Math.floor(Math.random() * theirInv.length - 1)];
-  //           offer.addTheirItem(theirItem);
-  //           offer.setMessage(
-  //             `Will you trade your ${theirItem.name} for my ${myItem.name}?`
-  //           );
-  //           offer.send((err, status) => {
-  //             if (err) {
-  //               console.log(err.message);
-  //             } else {
-  //               console.log(`Sent offer. Status: ${status}.`);
-  //             }
-  //           });
-  //         }
-  //       }
-  //     );
-  //   }
-  // });
 });
 
 app.get("/withdraw", (req, res) => {
